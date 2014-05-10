@@ -544,55 +544,56 @@ def logp( resids=None, Km=None, Kmn=None, knn=None, sigw=None, perturb=PERTURB )
     V = np.array( scipy.linalg.lu_solve( scipy.linalg.lu_factor( H ), Kmn ) )
     Qnn_diag = np.sum( V**2., axis=0 )
 
-    # Generate an array holding the diagonal entries of the W matrix, where:
-    #    W = Qnn + diag[ Knn - Qnn ]
-    W_diag = ( knn - Qnn_diag + Sig2_diag ).flatten()
+    # Generate an array holding the diagonal entries of the D matrix, where:
+    #    D = Qnn + diag[ Knn - Qnn ]
+    D_diag = ( knn - Qnn_diag + Sig2_diag ).flatten()
 
-    # Convert V to V*(W^-0.5) and compute V*(W^-1)*V:
-    V = np.matrix( V/np.tile( np.sqrt( W_diag ), [ m, 1 ] ) )
+    # Convert V to V*(D^-0.5) and compute V*(D^-1)*V:
+    V = np.matrix( V/np.tile( np.sqrt( D_diag ), [ m, 1 ] ) )
     VVT = V*V.T
 
-    # Convert r to (W^-0.5)*r and compute (r^T)*(W^-1)*r:
-    r = np.matrix( np.reshape( r.flatten()/np.sqrt( W_diag ), [ n, 1 ] ) )
+    # Convert r to (D^-0.5)*r and compute (r^T)*(D^-1)*r:
+    r = np.matrix( np.reshape( r.flatten()/np.sqrt( D_diag ), [ n, 1 ] ) )
 
     # To obtain L1, compute:
-    #        L1 = 0.5*logdet(B) + 0.5*logdet(W)
+    #        L1 = 0.5*logdet(B) + 0.5*logdet(D)
     # where:
     #   B*(B^T) = I + V*(V^T)
-    #           = I + (H^-1)*Kmn*(W^-1)*(Kmn^T)*(H^-T)
-    #           = (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(H^-T)
-    #           = (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(Km^-1)*H
-    #   det[ (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(Km^-1)*H ] = prod[ diag(B)^2 ]
+    #           = I + (H^-1)*Kmn*(D^-1)*(Kmn^T)*(H^-T)
+    #           = (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(H^-T)
+    #           = (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(Km^-1)*H
+    #   det[ (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(Km^-1)*H ] = prod[ diag(B)^2 ]
     #   (this is a standard result of the Cholesky decomposition)
-    #   --> logdet[ ( Kmm + Kmn*(W^-1)*(Kmn^T) )*(Km^-1) ] = 2*sum[ diag(B) ]
+    #   --> logdet[ ( Kmm + Kmn*(D^-1)*(Kmn^T) )*(Km^-1) ] = 2*sum[ diag(B) ]
     #   (using standard results det[ X*Y ]=det[X]*det[Y] and det[X^-1]=1/det[X])
     B = np.linalg.cholesky( np.matrix( np.eye( m ) ) + VVT )
     logdetB = 2*np.sum( np.log( np.diag( B ) ) )
-    logdetW = np.sum( np.log( W_diag ) )
-    L1 = 0.5*( logdetB + logdetW )
+    logdetD = np.sum( np.log( D_diag ) )
+    L1 = 0.5*( logdetB + logdetD )
 
     # To obtain L2, compute:
     #        L2 = 0.5*(r^T)*r - 0.5*(Y^T)*Y
     # where:
-    #   (Y^T)*Y = (r^T)*(W^-0.5)*(Z^T)*Z*(W^0.5)*r
-    #         Z = (B^-1)*V*(W^-0.5)
-    #           = (B^-1)*(H^-1)*Kmn*(W^-0.5)
-    #           = (B^-1)*(H^-1)*Kmn*(W^-0.5)
-    #       Z^T = (W^-0.5)*(Kmn^T)*(H^-T)*(B^-T)
+    #   (Y^T)*Y = (r^T)*(D^-0.5)*(Z^T)*Z*(D^0.5)*r
+    #         Z = (B^-1)*V*(D^-0.5)
+    #           = (B^-1)*(H^-1)*Kmn*(D^-0.5)
+    #           = (B^-1)*(H^-1)*Kmn*(D^-0.5)
+    #       Z^T = (D^-0.5)*(Kmn^T)*(H^-T)*(B^-T)
     # so that:
-    #   (Y^T)*Y = (r^T)*(W^-1)*(Kmn^T)*(H^-T)*(B^-T)*(B^-1)*(H^-1)*Kmn*(W^-1)*r
-    #           = norm[ H*B*Kmn*(W^-1)*r ]^2
+    #   (Y^T)*Y = (r^T)*(D^-1)*(Kmn^T)*(H^-T)*(B^-T)*(B^-1)*(H^-1)*Kmn*(D^-1)*r
+    #           = norm[ H*B*Kmn*(D^-1)*r ]^2
     # as it can be verified that:
-    #   (H*B)*[(H*B)^T] = Kmm + Kmn*(W^-1)*(Kmn^T)
+    #   (H*B)*[(H*B)^T] = Kmm + Kmn*(D^-1)*(Kmn^T)
     # so that:
-    #   (H^-T)*(B^-T)*(B^-1)*(H^-1) = (Kmm + Kmn*(W^-1)*(Kmn^T))^-1
+    #   (H^-T)*(B^-T)*(B^-1)*(H^-1) = (Kmm + Kmn*(D^-1)*(Kmn^T))^-1
     rTr = float( r.T*r )
     Z = np.matrix( scipy.linalg.lu_solve( scipy.linalg.lu_factor( B ), V ) )
     Y = Z*r
     YTY = float( Y.T*Y )
     L2 = 0.5*( rTr - YTY )
+    L3 = 0.5*n*np.log( 2*np.pi )
 
-    return -float( 0.5*n*np.log( 2*np.pi ) + L1 + L2 )
+    return -float(  L1 + L2 + L3 )
 
 
 def prep_fixedcov( gp_obj, perturb=PERTURB ):
@@ -615,6 +616,13 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
     dtrain = gp_obj.dtrain
     sigw = gp_obj.etrain
 
+    Kmn = cfunc( xinduc, xtrain, **cpars )
+    n = np.shape( Kmn )[1] # number of data points
+    m = np.shape( Kmn )[0] # number of inducing variables
+    Km = cfunc( xinduc, xinduc, **cpars ) + ( perturb**2. ) * np.eye( m )
+    knn = cfunc( xtrain, None, **cpars ).flatten()
+    knn = ( knn + perturb**2. ).flatten()
+
     # Convert sigw to an array and replace any zero
     # entries with jitter:
     if np.rank( sigw )==0:
@@ -625,13 +633,6 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
         sigw[ixs] = perturb
         ixs = ( sigw==0 )
         sigw[ixs] = perturb
-
-    Kmn = cfunc( xinduc, xtrain, **cpars )
-    n = np.shape( Kmn )[1] # number of data points
-    m = np.shape( Kmn )[0] # number of inducing variables
-    Km = cfunc( xinduc, xinduc, **cpars ) + ( perturb**2. ) * np.eye( m )
-    knn = cfunc( xtrain, None, **cpars ).flatten()
-
     Sig2_diag = sigw**2.
 
     # Calculate the diagonal entries of the Qnn matrix, where:
@@ -640,36 +641,67 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
     V = np.array( scipy.linalg.lu_solve( scipy.linalg.lu_factor( H ), Kmn ) )
     Qnn_diag = np.sum( V**2., axis=0 )
 
-    # Generate an array holding the diagonal entries of the W matrix, where:
-    #    W = Qnn + diag[ Knn - Qnn ]
-    W_diag = ( knn - Qnn_diag + Sig2_diag ).flatten()
+    # Generate an array holding the diagonal entries of the D matrix, where:
+    #    D = Qnn + diag[ Knn - Qnn ]
+    D_diag = ( knn - Qnn_diag + Sig2_diag ).flatten()
 
-    # Convert V to V*(W^-0.5) and compute V*(W^-1)*V:
-    V = np.matrix( V/np.tile( np.sqrt( W_diag ), [ m, 1 ] ) )
+    # CHECK THIS IS DOING THE RIGHT THING:
+    # Convert V to V*(D^-0.5) and compute V*(D^-1)*V: 
+    V = np.matrix( V/np.tile( np.sqrt( D_diag ), [ m, 1 ] ) )
     VVT = V*V.T
 
     # To obtain L1, compute:
-    #        L1 = 0.5*logdet(B) + 0.5*logdet(W)
+    #        L1 = 0.5*logdet(B) + 0.5*logdet(D)
     # where:
     #   B*(B^T) = I + V*(V^T)
-    #           = I + (H^-1)*Kmn*(W^-1)*(Kmn^T)*(H^-T)
-    #           = (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(H^-T)
-    #           = (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(Km^-1)*H
-    #   det[ (H^-1)*[ Kmm + Kmn*(W^-1)*(Kmn^T) ]*(Km^-1)*H ] = prod[ diag(B)^2 ]
-    #   (this is a standard result of the Cholesky decomposition)
-    #   --> logdet[ ( Kmm + Kmn*(W^-1)*(Kmn^T) )*(Km^-1) ] = 2*sum[ diag(B) ]
+    #           = I + (H^-1)*Kmn*(D^-1)*(Kmn^T)*(H^-T)
+    #           = (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(H^-T)
+    #           = (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(Km^-1)*H
+    #   det[ (H^-1)*[ Kmm + Kmn*(D^-1)*(Kmn^T) ]*(Km^-1)*H ] = prod[ diag(B)^2 ]
+    #   (the above is a standard result of the Cholesky decomposition)
+    #   --> logdet[ ( Kmm + Kmn*(D^-1)*(Kmn^T) )*(Km^-1) ] = 2*sum[ diag(B) ]
     #   (using standard results det[ X*Y ]=det[X]*det[Y] and det[X^-1]=1/det[X])
     B = np.linalg.cholesky( np.matrix( np.eye( m ) ) + VVT )
     logdetB = 2*np.sum( np.log( np.diag( B ) ) )
-    logdetW = np.sum( np.log( W_diag ) )
+    logdetD = np.sum( np.log( D_diag ) )
 
-    L1 = 0.5*( logdetB + logdetW )
+    L1 = 0.5*( logdetB + logdetD )
     Z = np.matrix( scipy.linalg.lu_solve( scipy.linalg.lu_factor( B ), V ) )
-    L3 = 0.5 * n * np.log( 2*np.pi )
+    L3 = 0.5*n*np.log( 2*np.pi )
+    sqrt_D_diag = np.reshape( np.sqrt( D_diag ), [ n, 1 ] )
 
-    kwpars = { 'L1':L1, 'L3':L3, 'Z':Z, 'sigw':sigw }
+    kwpars = { 'L1':L1, 'L3':L3, 'Z':Z, 'sqrt_D_diag':sqrt_D_diag }
 
     return kwpars
+
+
+def logp_fixedcov( resids=None, kwpars=None ):
+    """
+    Calculates the log likehood using a specific dictionary of arguments that
+    are generated using the prep_fixedcov() routine. This routine is used to
+    avoid re-calculating the components of the log likelihood that remain
+    unchanged if the covariance parameters are fixed, which can potentially
+    save time for things like type-II maximum likelihood. The usage of this
+    routine is along the lines of:
+      >> resids = data - model
+      >> kwpars = gp.prep_fixedcov()
+      >> logp = gp.logp_fixedcov( resids=resids, kwpars=kwpars )
+    """
+
+    L1 = kwpars['L1']
+    L3 = kwpars['L3']
+    Z = kwpars['Z']
+    sqrt_D_diag = kwpars['sqrt_D_diag']
+    r = np.matrix( resids/sqrt_D_diag )
+    
+    # rTr should be rT*(D^(-1))*r
+    rTr = float( r.T*r )
+    Y = Z*r
+    YTY = float( Y.T*Y )
+    L2 = 0.5*( rTr - YTY )
+
+    return -float( L1 + L2 + L3 )
+
 
 def prep_fixedcov_OLD( gp_obj, perturb=PERTURB ):
     """
@@ -706,7 +738,7 @@ def prep_fixedcov_OLD( gp_obj, perturb=PERTURB ):
     Kmn = gp_obj.cfunc( gp_obj.xinduc, gp_obj.xtrain, **gp_obj.cpars )
     knn = gp_obj.cfunc( gp_obj.xtrain, None, **gp_obj.cpars )
     n = np.shape( Kmn )[1] 
-    m = np.shape( Kmn )[0] 
+    m = np.shape( Kmn )[0]
 
     Km = np.matrix( Km + ( perturb**2. ) * np.eye( m ) )
     Kmn = np.matrix( Kmn )
@@ -725,37 +757,10 @@ def prep_fixedcov_OLD( gp_obj, perturb=PERTURB ):
     Z = np.matrix( Z )
     L1 = 0.5 * ( 2 * np.sum( np.log( np.diag( W ) ) ) + np.sum( np.log( gnn ) ) \
          + ( n-m ) * np.log( gp_obj.etrain**2. ) )
-    L3 = 0.5 * n * np.log( 2*np.pi )
+    L3 = 0.5*n*np.log( 2*np.pi )
     kwpars = { 'L1':L1, 'L3':L3, 'gnn':gnn, 'Z':Z, 'sigw':etrain }
     
     return kwpars
-
-
-def logp_fixedcov( resids=None, kwpars=None ):
-    """
-    Calculates the log likehood using a specific dictionary of arguments that
-    are generated using the prep_fixedcov() routine. This routine is used to
-    avoid re-calculating the components of the log likelihood that remain
-    unchanged if the covariance parameters are fixed, which can potentially
-    save time for things like type-II maximum likelihood. The usage of this
-    routine is along the lines of:
-      >> resids = data - model
-      >> kwpars = gp.prep_fixedcov()
-      >> logp = gp.logp_fixedcov( resids=resids, kwpars=kwpars )
-    """
-
-    r = np.matrix( resids )
-    L1 = kwpars['L1']
-    L3 = kwpars['L3']
-    Z = kwpars['Z']
-    sigw = kwpars['sigw']
-    
-    rTr = float( r.T*r )
-    Y = Z*r
-    YTY = float( Y.T*Y )
-    L2 = 0.5*( rTr - YTY )
-
-    return -float( L1 + L2 + L3 )
 
     
 

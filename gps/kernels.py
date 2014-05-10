@@ -37,7 +37,7 @@ from scipy.special import gamma,kv
 
 ########################################################################################
 
- def sqexp( x, y, **cpars ):
+def sqexp( x, y, **cpars ):
     """
     Squared exponential kernel for 1D input.
     """
