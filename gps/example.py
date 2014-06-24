@@ -17,7 +17,7 @@ data = y + e
 # Create GP object:
 gp_obj = gp_class.gp( which_type='full' ) # full rather than sparse GP
 gp_obj.mfunc = None # zero mean function; otherwise point to user-defined mean function
-gp_obj.mpars = {} # empty dict for mean function parameters
+gp_obj.mpars = {} # empty dict for mean function parameters seeing as we're using a zero mean function
 gp_obj.cfunc = kernels.sqexp # squared exponential covariance kernel
 gp_obj.cpars = { 'amp':1, 'scale':2 } # covariance parameters
 # Note: Users are encouraged to write their own covariance
@@ -29,7 +29,7 @@ gp_obj.cpars = { 'amp':1, 'scale':2 } # covariance parameters
 # the dimensionality of input space; here M=1:
 gp_obj.xtrain = np.reshape( x, [ n, 1 ] )
 
-# Same for training data:
+# The training data must be Nx1:
 gp_obj.dtrain = np.reshape( data, [ n, 1 ] )
 
 # White noise error term: 
@@ -45,7 +45,7 @@ emesh = None # i.e. set white noise to zero on draws
 draws_unconditioned = gp_obj.random_draw( xmesh=xmesh, emesh=emesh, conditioned=False, \
                                           ndraws=4, plot_draws=True )
 
-# Now do the same thing, but the the random draws
+# Now do the same thing, but with the random draws
 # taken from the GP conditioned on the data:
 draws_conditioned = gp_obj.random_draw( xmesh=xmesh, emesh=emesh, conditioned=True, \
                                         ndraws=4, plot_draws=True )
@@ -69,9 +69,9 @@ print 'time taken = {0:.5f} sec'.format( t2-t1 )
 # only needs to be performed once, so subsequent
 # evaluations of the likelihood are very quick.
 # Here's how to do this:
-cov_kwpars = gp_obj.prep_fixedcov() # does precomputations
+cov_kwpars = gp_obj.prep_fixedcov() # does precomputations before running optimiser
 t1 = time.time()
-logp = gp_obj.logp_fixedcov( resids=gp_obj.dtrain, kwpars=cov_kwpars )
+logp = gp_obj.logp_fixedcov( resids=gp_obj.dtrain, kwpars=cov_kwpars ) # wrap this in optimiser
 t2 = time.time()
 print '\nlogp_fixedcov = {0}'.format( logp )
 print 'time taken = {0:.5f} sec'.format( t2-t1 )
