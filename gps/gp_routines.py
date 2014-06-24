@@ -49,8 +49,9 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
     xtrain = gp_obj.xtrain
     dtrain = gp_obj.dtrain
     etrain = gp_obj.etrain
-    n = np.shape( xtrain )[0]
-    d = np.shape( xtrain )[1]    
+    if xtrain!=None:
+        n = np.shape( xtrain )[0]
+        d = np.shape( xtrain )[1]    
     if xmesh==None:
         nmesh=1000
         xmesh = np.r_[ xtrain.min() : xtrain.max() : 1j*nmesh ]
