@@ -178,7 +178,7 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
 
     # Ensure that etrain is formatted as an array
     # and any zero entries replaced with jitter:
-    if np.rank( etrain )==0:
+    if np.ndim( etrain )==0:
         if ( etrain==None )+( etrain==0 ):
             etrain = perturb*np.ones( n )
     else:
@@ -187,7 +187,7 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
         ixs = ( etrain==0 )
         etrain[ixs] = perturb
     # Do the same for enew:
-    if np.rank( enew )==0:
+    if np.ndim( enew )==0:
         if ( enew==None ):
             enew = np.zeros( p )
     else:
@@ -336,7 +336,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         conditioned = False
     # Ensure that etrain is formatted as an array
     # and any zero entries replaced with jitter:
-    if np.rank( etrain )==0:
+    if np.ndim( etrain )==0:
         if ( etrain==None )+( etrain==0 ):
             etrain = perturb*np.ones( n )
     else:
@@ -345,7 +345,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         ixs = ( etrain==0 )
         etrain[ixs] = perturb
     # Do the same for enew:
-    if np.rank( enew )==0:
+    if np.ndim( enew )==0:
         if ( enew==None ):
             enew = np.zeros( p )
     else:
@@ -446,7 +446,7 @@ def logp_builtin( gp_obj, perturb=None ):
         cpars = {}
     # Ensure that etrain is formatted as an array
     # and any zero entries replaced with jitter:
-    if np.rank( etrain )==0:
+    if np.ndim( etrain )==0:
         if ( etrain==None )+( etrain==0 ):
             etrain = perturb*np.ones( n )
     else:
@@ -520,7 +520,7 @@ def logp( resids=None, Km=None, Kmn=None, knn=None, sigw=None, perturb=PERTURB )
 
     # Convert sigw to an array and replace any zero
     # entries with jitter:
-    if np.rank( sigw )==0:
+    if np.ndim( sigw )==0:
         if ( sigw==None )+( sigw==0 ):
             sigw = perturb*np.ones( n )
     else:
@@ -625,7 +625,7 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
 
     # Convert sigw to an array and replace any zero
     # entries with jitter:
-    if np.rank( sigw )==0:
+    if np.ndim( sigw )==0:
         if ( sigw==None )+( sigw==0 ):
             sigw = perturb*np.ones( n )
     else:
@@ -716,7 +716,7 @@ def prep_fixedcov_OLD( gp_obj, perturb=PERTURB ):
     # Ensure that etrain is formatted as an array
     # and any zero entries replaced with jitter:
     etrain = gp_obj.etrain
-    if np.rank( etrain )==0:
+    if np.ndim( etrain )==0:
         if ( etrain==None )+( etrain==0 ):
             etrain = perturb*np.ones( n )
     else:
@@ -725,7 +725,7 @@ def prep_fixedcov_OLD( gp_obj, perturb=PERTURB ):
         ixs = ( etrain==0 )
         etrain[ixs] = perturb
     # Do the same for enew:
-    if np.rank( enew )==0:
+    if np.ndim( enew )==0:
         if ( enew==None ):
             enew = np.zeros( p )
     else:

@@ -1,6 +1,7 @@
 import pdb, os, sys
 import matplotlib.pyplot as plt
 import numpy as np
+import numexpr
 import scipy.spatial
 from scipy.special import gamma,kv
 
@@ -54,7 +55,8 @@ def sqexp( x, y, **cpars ):
         ny = np.shape( y )[0]
         y = np.matrix( y )/scale
         D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
-        cov = ( amp**2. ) * np.exp( -0.5 * D2 )
+        #cov = ( amp**2. ) * np.exp( -0.5 * D2 )
+        cov = ( amp**2. ) * numexpr.evaluate( 'exp(-0.5 * D2)' )
 
     return cov
 
@@ -296,9 +298,9 @@ def EuclideanDist( X1, X2, v=None ):
   
   """
 
-  if np.rank( X1 )==1:
+  if np.ndim( X1 )==1:
       X1 = np.reshape( X1, [ len( X1 ), 1 ] )
-  if np.rank( X2 )==1:
+  if np.ndim( X2 )==1:
       X2 = np.reshape( X2, [ len( X2 ), 1 ] )
 
   X1,X2 = np.matrix(X1), np.matrix(X2)
@@ -323,9 +325,9 @@ def EuclideanDist2( X1, X2, v=None ):
   
   """
 
-  if np.rank( X1 )==1:
+  if np.ndim( X1 )==1:
       X1 = np.reshape( X1, [ len( X1 ), 1 ] )
-  if np.rank( X2 )==1:
+  if np.ndim( X2 )==1:
       X2 = np.reshape( X2, [ len( X2 ), 1 ] )
   
   #ensure inputs are in matrix form
