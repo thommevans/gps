@@ -280,8 +280,16 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
     if xnew==None:
         xnew = xtrain
         conditioned = False
-    if ( enew==None )+( enew==0 ):
-        enew = perturb
+    if np.ndim( etrain )==0:
+        if ( enew==None )+( enew==0 ):
+            enew = perturb*np.ones( n )
+        else:
+            enew = enew*np.ones( n )
+    elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+        etrain = perturn*np.ones( n )
+
+    #pdb.set_trace()
+
     # The number of predictive points:
     p = np.shape( xnew )[0]
 
@@ -418,13 +426,12 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
 
     # Get the log determinant of the covariance matrix:
     sign, logdet_Kn = np.linalg.slogdet( Kn )
-
     # Calculate the product inv(c)*deldm using LU factorisations:
     invKn_r = scipy.linalg.lu_solve( scipy.linalg.lu_factor( Kn ), r )
     rT_invKn_r = float( r.T * np.matrix( invKn_r ) )
-
     # Calculate the log likelihood:
     loglikelihood = - 0.5*logdet_Kn - 0.5*rT_invKn_r - 0.5*n*np.log( 2*np.pi )
+    tf=time.time()
 
     return float( loglikelihood )
 
