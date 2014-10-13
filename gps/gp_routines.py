@@ -281,14 +281,19 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         xnew = xtrain
         conditioned = False
     if np.ndim( etrain )==0:
+        if ( etrain==None )+( etrain==0 ):
+            etrain = perturb*np.ones( n )
+        else:
+            etrain = etrain*np.ones( n )
+    elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+        etrain = perturb*np.ones( n )
+    if np.ndim( enew )==0:
         if ( enew==None )+( enew==0 ):
             enew = perturb*np.ones( n )
         else:
             enew = enew*np.ones( n )
-    elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
-        etrain = perturn*np.ones( n )
-
-    #pdb.set_trace()
+    elif ( np.all( enew )==None )+( np.all( enew )==0 ):
+        enew = perturb*np.ones( n )
 
     # The number of predictive points:
     p = np.shape( xnew )[0]
@@ -318,6 +323,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         Knp = np.matrix( cfunc( xtrain, xnew, **cpars ) )
 
         # Use Cholesky decompositions to efficiently calculate the predictive mean:
+        pdb.set_trace()
         L = np.linalg.cholesky( Kn )
         Linv_rtrain = np.matrix( scipy.linalg.lu_solve( scipy.linalg.lu_factor( L ), rtrain ) )
         LTinv_Linv_rtrain = np.linalg.lstsq( L.T, Linv_rtrain )[0]
@@ -412,7 +418,7 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
     
     'loglikelihood' [float] - the gp log likelihood.
     """
-
+    t1=time.time()
     n = np.shape( resids )[0]
     if ( np.ndim( sigw )==0 ):
         if ( sigw==None )+( sigw==0.0 ):
@@ -423,15 +429,13 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
         sigw = perturb*np.ones( n )
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
     r = np.matrix( resids )
-
     # Get the log determinant of the covariance matrix:
-    sign, logdet_Kn = np.linalg.slogdet( Kn )
+    sign, logdet_Kn = np.linalg.slogdet( Kn ) # cpu bottleneck
     # Calculate the product inv(c)*deldm using LU factorisations:
-    invKn_r = scipy.linalg.lu_solve( scipy.linalg.lu_factor( Kn ), r )
+    invKn_r = scipy.linalg.lu_solve( scipy.linalg.lu_factor( Kn ), r ) # cpu bottleneck
     rT_invKn_r = float( r.T * np.matrix( invKn_r ) )
     # Calculate the log likelihood:
     loglikelihood = - 0.5*logdet_Kn - 0.5*rT_invKn_r - 0.5*n*np.log( 2*np.pi )
-    tf=time.time()
 
     return float( loglikelihood )
 
