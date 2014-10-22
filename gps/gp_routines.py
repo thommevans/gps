@@ -271,6 +271,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
     xtrain = gp_obj.xtrain
     dtrain = gp_obj.dtrain
     etrain = gp_obj.etrain
+    n = np.shape( xtrain )[0]
     if mfunc==None:
         mfunc = zero_mfunc
     if mpars==None:
@@ -287,6 +288,8 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
             etrain = etrain*np.ones( n )
     elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
         etrain = perturb*np.ones( n )
+    elif ( np.ndim( etrain )==2 )*( np.shape( etrain )[1]==1 ):
+        etrain = etrain.flatten()
     if np.ndim( enew )==0:
         if ( enew==None )+( enew==0 ):
             enew = perturb*np.ones( n )
@@ -294,6 +297,8 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
             enew = enew*np.ones( n )
     elif ( np.all( enew )==None )+( np.all( enew )==0 ):
         enew = perturb*np.ones( n )
+    elif ( np.ndim( enew )==2 )*( np.shape( enew )[1]==1 ):
+        enew = enew.flatten()
 
     # The number of predictive points:
     p = np.shape( xnew )[0]
@@ -319,11 +324,9 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         mnew = np.matrix( mnew ).T
         kpp = np.matrix( kpp + enew**2. ).T
         Kn = np.matrix( cfunc( xtrain, xtrain, **cpars ) + np.diag( etrain**2. ) )
-        #pdb.set_trace()
         Knp = np.matrix( cfunc( xtrain, xnew, **cpars ) )
 
         # Use Cholesky decompositions to efficiently calculate the predictive mean:
-        pdb.set_trace()
         L = np.linalg.cholesky( Kn )
         Linv_rtrain = np.matrix( scipy.linalg.lu_solve( scipy.linalg.lu_factor( L ), rtrain ) )
         LTinv_Linv_rtrain = np.linalg.lstsq( L.T, Linv_rtrain )[0]
