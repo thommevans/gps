@@ -100,13 +100,15 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
         dtrain = dtrain.flatten()
         zorder0 = 4
         xtrain_i = xtrain[:,mesh_dim].flatten()
-        if np.ndim( etrain==0 ):
+        if np.ndim( etrain )==0:
             if ( etrain==0 )+( etrain==None ):
                 plot_errs = False
             else:
                 plot_errs = True
                 errs = etrain*np.ones( n )
         else:
+            if ( np.ndim( etrain )==2 )*( np.shape( etrain )[1]==1 ):
+                etrain = etrain.flatten()
             if ( np.all( etrain )==None )+( np.all( etrain )==0 ):
                 plot_errs = False
             else:
@@ -198,6 +200,8 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
                 etrain = etrain*np.ones( n )
         elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
             etrain = perturn*np.ones( n )
+        elif ( np.ndim( etrain )==2 )*( np.shape( etrain )[1]==1 ):
+            etrain = etrain.flatten()
         mtrain = mfunc( xtrain, **mpars )
         rtrain = np.matrix( dtrain.flatten() - mtrain.flatten() ).T
         mnew = np.matrix( mnew ).T
@@ -317,6 +321,8 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
                 etrain = etrain*np.ones( n )
         elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
             etrain = perturb*np.ones( n )
+        elif ( np.ndim( etrain )==2 )*( np.shape( etrain )[1]==1 ):
+            etrain = etrain.flatten()
 
         # Precomputations:
         mtrain = mfunc( xtrain, **mpars )
@@ -380,6 +386,8 @@ def logp_builtin( gp_obj, perturb=PERTURB ):
             etrain = etrain*np.ones( n )
     elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
         etrain = perturb*np.ones( n )
+    elif ( np.ndim( etrain )==2 )*( np.shape( etrain )[1]==1 ):
+        etrain = etrain.flatten()
         
     if mfunc==None:
         mfunc = zero_mfunc
@@ -430,6 +438,8 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
             sigw = sigw*np.ones( n )
     elif ( np.all( sigw )==None )+( np.all( sigw )==0 ):
         sigw = perturb*np.ones( n )
+    elif ( np.ndim( sigw )==2 )*( np.shape( sigw )[1]==1 ):
+        sigw = sigw.flatten()
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
     r = np.matrix( resids )
     # Get the log determinant of the covariance matrix:
@@ -462,6 +472,8 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
             sigw = gp_obj.etrain*np.ones( n )
     elif ( np.all( gp_obj.etrain )==None )+( np.all( gp_obj.etrain )==0 ):
         sigw = gp_obj.etrain*np.ones( n )
+    elif ( np.ndim( gp_obj.etrain )==2 )*( np.shape( gp_obj.etrain )[1]==1 ):
+        sigw = gp_obj.etrain.flatten()
     else:
         sigw = gp_obj.etrain
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
