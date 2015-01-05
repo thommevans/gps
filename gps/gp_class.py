@@ -2,7 +2,7 @@ import sys, os, pdb, time
 import gp_routines, spgp_routines
 import numpy as np
 
-PERTURB = 1e-4
+PERTURB = 1e-7
 
 class gp():
     """

@@ -53,7 +53,7 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
         n = np.shape( xtrain )[0]
         d = np.shape( xtrain )[1]    
     if xmesh==None:
-        nmesh=1000
+        nmesh = 1000
         xmesh = np.r_[ xtrain.min() : xtrain.max() : 1j*nmesh ]
         xmesh = np.reshape( xmesh, [ nmesh, 1 ] )
     else:
@@ -178,13 +178,22 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
     if xnew==None:
         xnew = xtrain
         conditioned = False
-    if ( enew==None )+( enew==0 ):
-        enew = perturb
-    mnew = mfunc( xnew, **mpars ).flatten()
-    knn = cfunc( xnew, None, **cpars ).flatten()
 
     # The number of predictive points:
     p = np.shape( xnew )[0]
+
+    if np.ndim( enew )==0:
+        if ( enew==None )+( enew==0 ):
+            enew = perturb*np.ones( p )
+        else:
+            enew = enew*np.ones( p )
+    elif ( np.all( enew )==None )+( np.all( enew )==0 ):
+        enew = perturn*np.ones( p )
+    elif ( np.ndim( enew )==2 ):
+        enew = enew.flatten()
+    
+    mnew = mfunc( xnew, **mpars ).flatten()
+    knn = cfunc( xnew, None, **cpars ).flatten()
 
     # Evaluate the covariance matrix block for the new points:
     Kp = cfunc( xnew, xnew, **cpars ) + ( enew**2. ) * np.eye( p )
@@ -312,7 +321,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
 
     # Evaluate the predictive means and variances:
     if conditioned==True:
-        
+
         n = np.shape( xtrain )[0]
         if np.ndim( etrain )==0:
             if ( etrain==None )+( etrain==0 ):
