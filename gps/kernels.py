@@ -1,7 +1,11 @@
 import pdb, os, sys
 import matplotlib.pyplot as plt
 import numpy as np
-import numexpr
+try:
+    import numexpr
+    numexpr_installed = True
+except:
+    numexpr_installed = False
 import scipy.spatial
 from scipy.special import gamma,kv
 
@@ -60,15 +64,35 @@ def sqexp( x, y, **cpars ):
 
     return cov
 
+def sqexp_invL( x, y, **cpars ):
+    """
+    Squared exponential kernel for 1D input.
+    """
+
+    amp = cpars['amp']
+    iscale = cpars['iscale']
+
+    x = np.matrix( x )*np.sqrt( iscale )
+    if y==None:
+        n = np.shape( x )[0]
+        cov = ( amp**2. ) + np.zeros( n )
+        cov = np.reshape( cov, [ n, 1 ] )
+    else:
+        ny = np.shape( y )[0]
+        y = np.matrix( y )*np.sqrt( iscale )
+        D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
+        #cov = ( amp**2. ) * np.exp( -0.5 * D2 )
+        cov = ( amp**2. ) * numexpr.evaluate( 'exp(-0.5 * D2)' )
+
+    return cov
+
 
 def sqexp_ard( x, y, **cpars ):
     """
     Squared exponential kernel with ARD for N-dimension inputs.
     """
-
     amp = cpars['amp']
     scales = np.array( cpars['scale'] )
-    
     x = np.matrix( x )
     if y==None:
         n = np.shape( x )[0]
@@ -81,8 +105,88 @@ def sqexp_ard( x, y, **cpars ):
         y = y * v
         D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
         cov = ( amp**2. ) * np.exp( -0.5 * D2 )
+    return cov
+
+
+def sqexp_invL_ard_numpy( x, y, **cpars ):
+    """
+    Squared exponential kernel with ARD for N-dimension inputs.
+
+    k(x1,x2) = A*exp[ -0.5*sum(Di/Li)^2 ]
+    
+    where x1 and x2 are two NxM arrays with each column representing
+    a different input vector, Di is the Euclidean norm between the ith
+    input vectors of x1 and x2, and Li is the corresponding covariance
+    length scale. In terms of cpars:
+
+    'amp' - Covariance amplitude A
+    'scale' - Array containing the inverse covariance length scales of
+              the form 0.5/(Li^2).
+    """
+
+    amp = cpars['amp']
+    scales = np.array( cpars['scale'] )
+
+    x = np.matrix( x )
+    if y==None:
+        n = np.shape( x )[0]
+        cov = ( amp**2. ) + np.zeros( n )
+        cov = np.reshape( cov, [ n, 1 ] )
+    else:
+        y = np.matrix( y )
+        v = np.matrix( np.sqrt( np.diag( scales ) ) )
+        x = x * v
+        y = y * v
+        D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
+        cov = ( amp**2. ) * np.exp( -D2 )
 
     return cov
+
+def sqexp_invL_ard( x, y, **cpars ):
+    """
+    Squared exponential kernel with ARD for N-dimension inputs.
+
+    k(x1,x2) = A*exp[ -0.5*sum(Di/Li)^2 ]
+    
+    where x1 and x2 are two NxM arrays with each column representing
+    a different input vector, Di is the Euclidean norm between the ith
+    input vectors of x1 and x2, and Li is the corresponding covariance
+    length scale. In terms of cpars:
+
+    'amp' - Covariance amplitude A
+    'scale' - Array containing the inverse covariance length scales of
+              the form 0.5/(Li^2).
+    """
+
+    if numexpr_installed==False:
+
+        cov = sqexp_invL_ard_numpy( x, y, **cpars )
+
+    else:
+
+        amp = cpars['amp']
+        amp2 = numexpr.evaluate( 'amp**2.' )
+        iscales = np.array( cpars['iscale'] )
+
+        x = np.matrix( x )
+        if y==None:
+            n = np.shape( x )[0]
+            cov = amp2 + np.zeros( n )
+            cov = np.reshape( cov, [ n, 1 ] )
+        else:
+            y = np.matrix( y )
+            sqrt_iscales = numexpr.evaluate( 'sqrt( iscales )' )
+            v = np.matrix( np.diag( sqrt_iscales ) )
+            x = x*v # cannot do matrix multiplication with numexpr
+            y = y*v # cannot do matrix multiplication with numexpr
+            # GENERAL COMMENT: I imagine numexpr should also be able to 
+            # speed up the scipy.spatial.distance.cdist() calls... but 
+            # will need to think about how to implement this...
+            D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
+            cov = numexpr.evaluate( 'amp2*exp( -D2 )' )
+
+    return cov
+
 
 
 ########################################################################################
@@ -322,7 +426,39 @@ def EuclideanDist2( X1, X2, v=None ):
   X2 - m x D input matrix
   v - weight vector
   D2 - output an n x m matrix of dist^2 = Sum_i (1/l_i^2) * (x_i - x'_i)^2
+
+  Adapted from NG's code...
+
+  """
+
+  if np.ndim( X1 )==1:
+      X1 = np.reshape( X1, [ len( X1 ), 1 ] )
+  if np.ndim( X2 )==1:
+      X2 = np.reshape( X2, [ len( X2 ), 1 ] )
   
+  #ensure inputs are in matrix form
+  X1,X2 = np.matrix(X1), np.matrix(X2)
+  
+  if v != None: #scale each coord in Xs by the weight vector
+    V = np.abs(np.matrix( np.diag(v) ))
+    X1 = X1 * V
+    X2 = X2 * V
+  
+  #calculate sqaured euclidean distance (after weighting)
+  D2 = scipy.spatial.distance.cdist( X1, X2, 'sqeuclidean' )
+  
+  return D2
+
+def EuclideanDist2_ORIG( X1, X2, v=None ):
+  """
+  Calculate the distance matrix squared for 2 data matricies
+  X1 - n x D input matrix
+  X2 - m x D input matrix
+  v - weight vector
+  D2 - output an n x m matrix of dist^2 = Sum_i (1/l_i^2) * (x_i - x'_i)^2
+  
+  TE's original....
+
   """
 
   if np.ndim( X1 )==1:
@@ -342,6 +478,7 @@ def EuclideanDist2( X1, X2, v=None ):
   D2 = scipy.spatial.distance.cdist( X1, X2, 'sqeuclidean' )
   
   return D2
+
 
 ####################################################################################################
 
