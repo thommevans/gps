@@ -64,6 +64,32 @@ def sqexp( x, y, **cpars ):
 
     return cov
 
+
+def matern32_invL( x, y, **cpars ):
+  """
+  Matern kernel with nu = 3/2 for 1D input.
+  """
+  
+  amp = cpars['amp']
+  iscale = cpars['iscale']
+
+  x = np.matrix( x )
+  if y==None:
+      n = np.shape( x )[0]
+      cov = ( amp**2. ) + np.zeros( n )
+      cov = np.reshape( cov, [ n, 1 ] )
+  else:
+      y = np.matrix( y )
+      D = scipy.spatial.distance.cdist( x, y, 'euclidean')
+      arg = numexpr.evaluate( 'sqrt( 3 )*D*iscale' )
+      poly_term = numexpr.evaluate( '1. + arg' )
+      exp_term = numexpr.evaluate( 'exp( -arg )' )
+      cov = numexpr.evaluate( '( amp**2 )*poly_term*exp_term' )
+
+  return cov
+
+
+
 def sqexp_invL( x, y, **cpars ):
     """
     Squared exponential kernel for 1D input.

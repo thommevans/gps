@@ -334,6 +334,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
             etrain = etrain.flatten()
 
         # Precomputations:
+
         mtrain = mfunc( xtrain, **mpars )
         rtrain = np.matrix( dtrain.flatten() - mtrain.flatten() ).T
         mnew = np.matrix( mnew ).T
@@ -346,7 +347,7 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
         Linv_rtrain = np.matrix( scipy.linalg.lu_solve( scipy.linalg.lu_factor( L ), rtrain ) )
         LTinv_Linv_rtrain = np.linalg.lstsq( L.T, Linv_rtrain )[0]
         mu = np.array( mnew + Knp.T * LTinv_Linv_rtrain ).flatten()
-        
+
         # Now do similar for the predictive variances:
         Linv_Knp = scipy.linalg.lu_solve( scipy.linalg.lu_factor( L ), Knp )
         T = np.sum( Linv_Knp**2, axis=0 )
@@ -504,22 +505,10 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
     r = np.matrix( resids )
     t1=time.time()
-    ChoFactor = scipy.linalg.cho_factor( Kn )
-    logdetK = (2*np.log(np.diag(ChoFactor[0])).sum())
-    logP = -0.5 * r.T * np.mat(scipy.linalg.cho_solve(ChoFactor,r)) - 0.5 * logdetK - (r.size/2.) * np.log(2*np.pi)
+    chofactor = scipy.linalg.cho_factor( Kn )
+    logdetK = ( 2*np.log( np.diag( chofactor[0] ) ).sum() )
+    logP = -0.5*r.T*np.mat( scipy.linalg.cho_solve( chofactor, r ) ) - 0.5*logdetK - 0.5*r.size*np.log( 2*np.pi )
     t2=time.time()
-    # Get the log determinant of the covariance matrix:
-    #sign, logdet_Kn = np.linalg.slogdet( Kn ) # cpu bottleneck
-    # Calculate the product inv(c)*deldm using LU factorisations:
-    #invKn_r = scipy.linalg.lu_solve( scipy.linalg.lu_factor( Kn ), r ) # cpu bottleneck
-    #rT_invKn_r = float( r.T * np.matrix( invKn_r ) )
-    # Calculate the log likelihood:
-    #loglikelihood = - 0.5*logdet_Kn - 0.5*rT_invKn_r - 0.5*n*np.log( 2*np.pi )
-    #t3=time.time()
-    #print float(logP)-loglikelihood
-    #print t2-t1
-    #print t3-t2
-    #pdb.set_trace()
     return float( logP )
 
 
