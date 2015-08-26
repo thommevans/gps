@@ -192,6 +192,7 @@ def sqexp_invL_ard( x, y, **cpars ):
 
         amp = cpars['amp']
         amp2 = numexpr.evaluate( 'amp**2.' )
+        #amp2 = cpars['amp2']
         iscales = np.array( cpars['iscale'] )
 
         x = np.matrix( x )
@@ -210,6 +211,47 @@ def sqexp_invL_ard( x, y, **cpars ):
             # will need to think about how to implement this...
             D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
             cov = numexpr.evaluate( 'amp2*exp( -D2 )' )
+
+    return cov
+
+
+def matern32_invL_ard( x, y, **cpars ):
+    """
+    Matern v=3/2 kernel with ARD for N-dimension inputs.
+    'amp' - Covariance amplitude A
+    'scale' - Array containing the inverse covariance length scales.
+    """
+
+    if numexpr_installed==False:
+
+        cov = sqexp_invL_ard_numpy( x, y, **cpars )
+
+    else:
+
+        amp = cpars['amp']
+        amp2 = numexpr.evaluate( 'amp**2.' )
+        #amp2 = cpars['amp2']
+        iscales = np.array( cpars['iscale'] )
+
+        x = np.matrix( x )
+        if y==None:
+            n = np.shape( x )[0]
+            cov = amp2 + np.zeros( n )
+            cov = np.reshape( cov, [ n, 1 ] )
+        else:
+            y = np.matrix( y )
+            sqrt_iscales = numexpr.evaluate( 'sqrt( iscales )' )
+            v = np.matrix( np.diag( sqrt_iscales ) )
+            x = x*v # cannot do matrix multiplication with numexpr
+            y = y*v # cannot do matrix multiplication with numexpr
+            # GENERAL COMMENT: I imagine numexpr should also be able to 
+            # speed up the scipy.spatial.distance.cdist() calls... but 
+            # will need to think about how to implement this...
+            D = scipy.spatial.distance.cdist( x, y, 'euclidean' )
+            arg = numexpr.evaluate( 'sqrt( 3. )*D' )
+            poly_term = numexpr.evaluate( '1. + arg + ( ( arg**2. )/3. )' )
+            exp_term = numexpr.evaluate( 'exp( -arg )' )
+            cov = numexpr.evaluate( 'amp2*poly_term*exp_term' )
 
     return cov
 
