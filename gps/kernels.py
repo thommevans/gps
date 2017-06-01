@@ -325,7 +325,8 @@ def matern32_ard( x, y, **cpars ):
         y = y * v
         D = scipy.spatial.distance.cdist( x, y, 'euclidean' )
         arg = np.sqrt( 3 )*D
-        poly_term = 1. + arg + ( ( arg**2. )/3. )
+        #poly_term = 1. + arg + ( ( arg**2. )/3. )
+        poly_term = 1. + arg
         exp_term = np.exp( -arg )
         cov = ( amp**2. )*poly_term*exp_term
 
