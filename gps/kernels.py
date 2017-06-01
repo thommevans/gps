@@ -249,7 +249,8 @@ def matern32_invL_ard( x, y, **cpars ):
             # will need to think about how to implement this...
             D = scipy.spatial.distance.cdist( x, y, 'euclidean' )
             arg = numexpr.evaluate( 'sqrt( 3. )*D' )
-            poly_term = numexpr.evaluate( '1. + arg + ( ( arg**2. )/3. )' )
+            #poly_term = numexpr.evaluate( '1. + arg + ( ( arg**2. )/3. )' )
+            poly_term = numexpr.evaluate( '1. + arg' )
             exp_term = numexpr.evaluate( 'exp( -arg )' )
             cov = numexpr.evaluate( 'amp2*poly_term*exp_term' )
 
