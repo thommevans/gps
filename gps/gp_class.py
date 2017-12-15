@@ -1,5 +1,5 @@
 import sys, os, pdb, time
-import gp_routines, spgp_routines
+from . import gp_routines, spgp_routines
 import numpy as np
 
 PERTURB = 1e-7
@@ -16,9 +16,9 @@ class gp():
         self.xtrain = None
         self.dtrain = None
         self.etrain = None
-        if which_type=='full':
+        if which_type is 'full':
             self.spgp = False
-        elif which_type=='sparse':
+        elif which_type is 'sparse':
             self.spgp = True
         self.xinduc = None
         self.mfunc = None
@@ -68,7 +68,7 @@ class gp():
 
         """
 
-        if self.spgp==False:
+        if self.spgp is False:
             draws = gp_routines.random_draw( self, xmesh=xmesh, emesh=emesh, conditioned=conditioned, \
                                              perturb=perturb, ndraws=ndraws, plot_draws=plot_draws, \
                                              mesh_dim=mesh_dim, lw=lw )
@@ -109,7 +109,7 @@ class gp():
         'loglikelihood' [float] - the gp log likelihood.
         """
 
-        if self.spgp==False:
+        if self.spgp is False:
             # Full GP:
             loglikelihood = gp_routines.logp( resids, Kn, sigw, perturb=perturb )
         else:
@@ -134,7 +134,7 @@ class gp():
             >> logp = gp.logp_builtin()
         """
 
-        if self.spgp==False:
+        if self.spgp is False:
             # Full GP:
             loglikelihood = gp_routines.logp_builtin( self, perturb=perturb )
         else:
@@ -154,7 +154,7 @@ class gp():
           >> logp = gp.logp_fixedcov( resids=resids, kwpars=kwpars )
         """
         
-        if self.spgp==False:
+        if self.spgp is False:
             # Full GP:
             kwpars = gp_routines.prep_fixedcov( self, perturb=perturb )
         else:
@@ -177,7 +177,7 @@ class gp():
           >> logp = gp.logp_fixedcov( resids=resids, kwpars=kwpars )
         """
 
-        if self.spgp==False:
+        if self.spgp is False:
             # Full GP:
             loglikelihood = gp_routines.logp_fixedcov( resids=resids, kwpars=kwpars )
         else:
@@ -192,8 +192,8 @@ class gp():
         SUMMARY
 
         Returns the mean and full covariance of a gp at the locations of xnew, with
-        random errors enew. If conditioned==True, the gp will be conditioned on the
-        training data stored in the gp_obj. If etrain==None or etrain==0 (stored within
+        random errors enew. If conditioned is True, the gp will be conditioned on the
+        training data stored in the gp_obj. If etrain is None or etrain is 0 (stored within
         gp_obj), a perturbation term of magnitude perturb will be added to the diagonal
         entries of the training covariance matrix before it is inverted for numerical
         stability.
@@ -226,7 +226,7 @@ class gp():
         'cov' [PxP array] - gp covariance values.
         """
         
-        if self.spgp==False:
+        if self.spgp is False:
             mu, cov = gp_routines.meancov( self, xnew=xnew, enew=enew, conditioned=conditioned, perturb=perturb )
         else:
             mu, cov = spgp_routines.meancov( self, xnew=xnew, enew=enew, conditioned=conditioned, perturb=perturb )
@@ -238,9 +238,9 @@ class gp():
         """
         SUMMARY
 
-        Returns the predictive mean and standard deviation of a gp.  If conditioned==True,
+        Returns the predictive mean and standard deviation of a gp.  If conditioned is True,
         the gp will be conditioned on the training data stored in the gp_obj. If
-        etrain==None or etrain==0 (stored within gp_obj), a perturbation term of magnitude
+        etrain is None or etrain is 0 (stored within gp_obj), a perturbation term of magnitude
         perturb will be added to the diagonal entries of the training covariance matrix
         before it is inverted for numerical stability. This routine is very similar to
         meancov, except that it only calculates the diagonal entries of the conditioned
@@ -275,7 +275,7 @@ class gp():
               the entries along the diagonal of the full covariance matrix.
         """
 
-        if self.spgp==False:
+        if self.spgp is False:
             mu, sig = gp_routines.predictive( self, xnew=xnew, enew=enew, \
                                               conditioned=conditioned, perturb=perturb )
         else:

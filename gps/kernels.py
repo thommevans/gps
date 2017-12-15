@@ -51,7 +51,7 @@ def sqexp( x, y, **cpars ):
     scale = cpars['scale']
 
     x = np.matrix( x )/scale
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -74,7 +74,7 @@ def matern32_invL( x, y, **cpars ):
   iscale = cpars['iscale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -98,18 +98,23 @@ def sqexp_invL( x, y, **cpars ):
     amp = cpars['amp']
     iscale = cpars['iscale']
 
+    #THIS WORKED 
     x = np.matrix( x )*np.sqrt( iscale )
-    if y==None:
+    #x = np.matrix( x )*np.sqrt( iscale )
+    #x = np.matrix( x )*iscale
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
     else:
         ny = np.shape( y )[0]
+        #THIS WORKED 
         y = np.matrix( y )*np.sqrt( iscale )
+        #y = np.matrix( y )*np.sqrt( iscale )
+        #y = np.matrix( y )*iscale
         D2 = scipy.spatial.distance.cdist( x, y, 'sqeuclidean' )
         #cov = ( amp**2. ) * np.exp( -0.5 * D2 )
         cov = ( amp**2. ) * numexpr.evaluate( 'exp(-0.5 * D2)' )
-
     return cov
 
 
@@ -120,7 +125,7 @@ def sqexp_ard( x, y, **cpars ):
     amp = cpars['amp']
     scales = np.array( cpars['scale'] )
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -154,7 +159,7 @@ def sqexp_invL_ard_numpy( x, y, **cpars ):
     scales = np.array( cpars['scale'] )
 
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -184,7 +189,7 @@ def sqexp_invL_ard( x, y, **cpars ):
               the form 0.5/(Li^2).
     """
 
-    if numexpr_installed==False:
+    if numexpr_installed is False:
 
         cov = sqexp_invL_ard_numpy( x, y, **cpars )
 
@@ -196,7 +201,7 @@ def sqexp_invL_ard( x, y, **cpars ):
         iscales = np.array( cpars['iscale'] )
 
         x = np.matrix( x )
-        if y==None:
+        if y is None:
             n = np.shape( x )[0]
             cov = amp2 + np.zeros( n )
             cov = np.reshape( cov, [ n, 1 ] )
@@ -222,7 +227,7 @@ def matern32_invL_ard( x, y, **cpars ):
     'scale' - Array containing the inverse covariance length scales.
     """
 
-    if numexpr_installed==False:
+    if numexpr_installed is False:
 
         cov = sqexp_invL_ard_numpy( x, y, **cpars )
 
@@ -234,7 +239,7 @@ def matern32_invL_ard( x, y, **cpars ):
         iscales = np.array( cpars['iscale'] )
 
         x = np.matrix( x )
-        if y==None:
+        if y is None:
             n = np.shape( x )[0]
             cov = amp2 + np.zeros( n )
             cov = np.reshape( cov, [ n, 1 ] )
@@ -270,7 +275,7 @@ def matern12( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -290,7 +295,7 @@ def matern32( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -313,7 +318,7 @@ def matern32_ard( x, y, **cpars ):
     scales = np.array( cpars['scale'] )
     
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -339,7 +344,7 @@ def matern52( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -363,7 +368,7 @@ def matern52_ard( x, y, **cpars ):
     scales = np.array( cpars['scale'] )
     
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -470,14 +475,14 @@ def EuclideanDist( X1, X2, v=None ):
   
   """
 
-  if np.ndim( X1 )==1:
+  if np.ndim( X1 ) is 1:
       X1 = np.reshape( X1, [ len( X1 ), 1 ] )
-  if np.ndim( X2 )==1:
+  if np.ndim( X2 ) is 1:
       X2 = np.reshape( X2, [ len( X2 ), 1 ] )
 
   X1,X2 = np.matrix(X1), np.matrix(X2)
   
-  if v != None: #scale each coord in Xs by the weight vector
+  if v is not None: #scale each coord in Xs by the weight vector
     V = np.abs(np.matrix( np.diag(1./v) ))
     X1 = X1 / V
     X2 = X2 / V
@@ -499,15 +504,15 @@ def EuclideanDist2( X1, X2, v=None ):
 
   """
 
-  if np.ndim( X1 )==1:
+  if np.ndim( X1 ) is 1:
       X1 = np.reshape( X1, [ len( X1 ), 1 ] )
-  if np.ndim( X2 )==1:
+  if np.ndim( X2 ) is 1:
       X2 = np.reshape( X2, [ len( X2 ), 1 ] )
   
   #ensure inputs are in matrix form
   X1,X2 = np.matrix(X1), np.matrix(X2)
   
-  if v != None: #scale each coord in Xs by the weight vector
+  if v is not None: #scale each coord in Xs by the weight vector
     V = np.abs(np.matrix( np.diag(v) ))
     X1 = X1 * V
     X2 = X2 * V
@@ -529,15 +534,15 @@ def EuclideanDist2_ORIG( X1, X2, v=None ):
 
   """
 
-  if np.ndim( X1 )==1:
+  if np.ndim( X1 ) is 1:
       X1 = np.reshape( X1, [ len( X1 ), 1 ] )
-  if np.ndim( X2 )==1:
+  if np.ndim( X2 ) is 1:
       X2 = np.reshape( X2, [ len( X2 ), 1 ] )
   
   #ensure inputs are in matrix form
   X1,X2 = np.matrix(X1), np.matrix(X2)
   
-  if v != None: #scale each coord in Xs by the weight vector
+  if v is not None: #scale each coord in Xs by the weight vector
     V = np.abs(np.matrix( np.diag(v) ))
     X1 = X1 * v
     X2 = X2 * v

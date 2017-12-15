@@ -59,8 +59,8 @@ draws_conditioned = gp_obj.random_draw( xmesh=xmesh, emesh=emesh, conditioned=Tr
 t1 = time.time()
 logp = gp_obj.logp_builtin()
 t2 = time.time()
-print '\nlogp_builtin = {0}'.format( logp )
-print 'time taken = {0:.5f} sec'.format( t2-t1 )
+print( '\nlogp_builtin = {0}'.format( logp ) )
+print( 'time taken = {0:.5f} sec'.format( t2-t1 ) )
 
 # Sometimes we might want to fix the covariance
 # parameters, and optimise for the mean function
@@ -73,8 +73,8 @@ cov_kwpars = gp_obj.prep_fixedcov() # does precomputations before running optimi
 t1 = time.time()
 logp = gp_obj.logp_fixedcov( resids=gp_obj.dtrain, kwpars=cov_kwpars ) # wrap this in optimiser
 t2 = time.time()
-print '\nlogp_fixedcov = {0}'.format( logp )
-print 'time taken = {0:.5f} sec'.format( t2-t1 )
+print( '\nlogp_fixedcov = {0}'.format( logp ) )
+print( 'time taken = {0:.5f} sec'.format( t2-t1 ) )
 # Note: In a real problem, the 'resids' input is
 # usually the difference between our training data
 # and our model for the mean function. Here, seeing

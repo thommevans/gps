@@ -63,10 +63,10 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
     else:
         nmesh = np.shape( xmesh )[0]
     if conditioned==True:
-        print '\nDrawing from GP posterior (i.e. after being trained on data set)'
+        print( '\nDrawing from GP posterior (i.e. after being trained on data set)' )
         title_str = 'posterior (i.e. trained)'
     else:
-        print '\nDrawing from GP prior (i.e. not trained on any data set)'
+        print( '\nDrawing from GP prior (i.e. not trained on any data set)' )
         title_str = 'prior (i.e. untrained)'
     mu, cov = meancov( gp_obj, xnew=xmesh, enew=emesh, conditioned=conditioned, perturb=perturb )
     sig = np.sqrt( np.diag( cov ).flatten() )
@@ -92,7 +92,7 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
 
     draws = []
     for i in range( ndraws ):
-        print ' drawing %i of %i on a mesh of %i points' % ( i+1, ndraws, nmesh )
+        print( ' drawing %i of %i on a mesh of %i points' % ( i+1, ndraws, nmesh ) )
         # The following step can be a computation bottleneck if there are too
         # many points on the mesh:
         draw = np.random.multivariate_normal( mu, cov )
@@ -460,7 +460,7 @@ def logp_builtin( gp_obj, perturb=None ):
     resids = dtrain.flatten() - mu.flatten()
     resids = np.reshape( resids, [ n, 1 ] )
     if xinduc==None:
-        print 'Must specify inducing inputs (xinduc)'
+        print( 'Must specify inducing inputs (xinduc)' )
         pdb.set_trace()
     Km = cfunc( xinduc, xinduc, **cpars )
     Kmn = cfunc( xinduc, xtrain, **cpars )            

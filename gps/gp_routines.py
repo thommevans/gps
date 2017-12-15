@@ -49,20 +49,20 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
     xtrain = gp_obj.xtrain
     dtrain = gp_obj.dtrain
     etrain = gp_obj.etrain
-    if xtrain!=None:
+    if xtrain is not None:
         n = np.shape( xtrain )[0]
         d = np.shape( xtrain )[1]    
-    if xmesh==None:
+    if xmesh is None:
         nmesh = 1000
         xmesh = np.r_[ xtrain.min() : xtrain.max() : 1j*nmesh ]
         xmesh = np.reshape( xmesh, [ nmesh, 1 ] )
     else:
         nmesh = np.shape( xmesh )[0]
-    if conditioned==True:
-        print '\nDrawing from GP posterior (i.e. after being trained on data set)'
+    if conditioned is True:
+        print( '\nDrawing from GP posterior (i.e. after being trained on data set)' )
         title_str = 'posterior (i.e. trained)'
     else:
-        print '\nDrawing from GP prior (i.e. not trained on any data set)'
+        print( '\nDrawing from GP prior (i.e. not trained on any data set)' )
         title_str = 'prior (i.e. untrained)'
 
     mu, cov = meancov( gp_obj, xnew=xmesh, enew=emesh, conditioned=conditioned, perturb=perturb )
@@ -70,7 +70,7 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
     mu = mu.flatten()
     sig = sig.flatten()
     xmesh_i = xmesh[:,mesh_dim].flatten()
-    if plot_draws==True:
+    if plot_draws is True:
         fig = plt.figure()
         ax = fig.add_axes( [ 0.05, 0.05, 0.9, 0.9 ] )
         zorder0 = 0
@@ -89,32 +89,32 @@ def random_draw( gp_obj, xmesh=None, emesh=None, conditioned=True, perturb=PERTU
 
     draws = []
     for i in range( ndraws ):
-        print ' drawing %i of %i on a mesh of %i points' % ( i+1, ndraws, nmesh )
+        print( ' drawing %i of %i on a mesh of %i points' % ( i+1, ndraws, nmesh ) )
         draw = np.random.multivariate_normal( mu, cov )
         draws += [ draw ]
-        if plot_draws==True:
+        if plot_draws is True:
             color = colormap.to_rgba( line_colors[i] )
             zorder0 = 3
             ax.plot( xmesh_i, draw, ls='-', c=color, lw=lw, zorder=1 )
-    if ( plot_draws==True )*( conditioned==True ):
+    if ( plot_draws is True )*( conditioned is True ):
         dtrain = dtrain.flatten()
         zorder0 = 4
         xtrain_i = xtrain[:,mesh_dim].flatten()
-        if np.ndim( etrain )==0:
-            if ( etrain==0 )+( etrain==None ):
+        if np.ndim( etrain ) is 0:
+            if ( etrain is 0 )+( etrain is None ):
                 plot_errs = False
             else:
                 plot_errs = True
                 errs = etrain*np.ones( n )
         else:
-            if ( np.ndim( etrain )==2 ):
+            if ( np.ndim( etrain ) is 2 ):
                 etrain = etrain.flatten()
-            if ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+            if ( np.all( etrain ) is None )+( np.all( etrain ) is 0 ):
                 plot_errs = False
             else:
                 plot_errs = True
                 errs = etrain
-        if plot_errs==False:
+        if plot_errs is False:
             ax.plot( xtrain_i, dtrain, fmt='o', mec='k', mfc='k', zorder=zorder0 )
         else:
             ax.errorbar( xtrain_i, dtrain, yerr=errs, fmt='o', mec='k', mfc='k', ecolor='k', \
@@ -128,8 +128,8 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
     SUMMARY
     
     Returns the mean and full covariance of a gp at the locations of xnew, with
-    random errors enew. If conditioned==True, the gp will be conditioned on the
-    training data stored in the gp_obj. If etrain==None or etrain==0 (stored within
+    random errors enew. If conditioned is True, the gp will be conditioned on the
+    training data stored in the gp_obj. If etrain is None or etrain is 0 (stored within
     gp_obj), a perturbation term of magnitude perturb will be added to the diagonal
     entries of the training covariance matrix before it is inverted for numerical
     stability.
@@ -169,27 +169,27 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
     xtrain = gp_obj.xtrain
     dtrain = gp_obj.dtrain
     etrain = gp_obj.etrain
-    if mfunc==None:
+    if mfunc is None:
         mfunc = zero_mfunc
-    if mpars==None:
+    if mpars is None:
         mpars = {}
-    if cpars==None:
+    if cpars is None:
         cpars = {}
-    if xnew==None:
+    if xnew is None:
         xnew = xtrain
         conditioned = False
 
     # The number of predictive points:
     p = np.shape( xnew )[0]
 
-    if np.ndim( enew )==0:
-        if ( enew==None )+( enew==0 ):
+    if np.ndim( enew ) is 0:
+        if ( enew is None )+( enew is 0 ):
             enew = perturb*np.ones( p )
         else:
             enew = enew*np.ones( p )
-    elif ( np.all( enew )==None )+( np.all( enew )==0 ):
+    elif ( np.all( enew ) is None )+( np.all( enew ) is 0 ):
         enew = perturn*np.ones( p )
-    elif ( np.ndim( enew )==2 ):
+    elif ( np.ndim( enew ) is 2 ):
         enew = enew.flatten()
     
     mnew = mfunc( xnew, **mpars ).flatten()
@@ -200,16 +200,16 @@ def meancov( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB ):
 
     # Evaluate the mean and covariance, which will require extra
     # work if the GP is to be conditioned on the training data:
-    if conditioned==True:
+    if conditioned is True:
         n = np.shape( xtrain )[0]
-        if np.ndim( etrain )==0:
-            if ( etrain==None )+( etrain==0 ):
+        if np.ndim( etrain ) is 0:
+            if ( etrain is None )+( etrain is 0 ):
                 etrain = perturb*np.ones( n )
             else:
                 etrain = etrain*np.ones( n )
-        elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+        elif ( np.all( etrain ) is None )+( np.all( etrain ) is 0 ):
             etrain = perturn*np.ones( n )
-        elif ( np.ndim( etrain )==2 ):
+        elif ( np.ndim( etrain ) is 2 ):
             etrain = etrain.flatten()
         mtrain = mfunc( xtrain, **mpars )
         rtrain = np.matrix( dtrain.flatten() - mtrain.flatten() ).T
@@ -240,9 +240,9 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
     """
     SUMMARY
     
-    Returns the predictive mean and standard deviation of a gp.  If conditioned==True,
+    Returns the predictive mean and standard deviation of a gp.  If conditioned is True,
     the gp will be conditioned on the training data stored in the gp_obj. If
-    etrain==None or etrain==0 (stored within gp_obj), a perturbation term of magnitude
+    etrain is None or etrain is 0 (stored within gp_obj), a perturbation term of magnitude
     perturb will be added to the diagonal entries of the training covariance matrix
     before it is inverted for numerical stability. This routine is very similar to
     meancov, except that it only calculates the diagonal entries of the conditioned
@@ -285,32 +285,33 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
     dtrain = gp_obj.dtrain
     etrain = gp_obj.etrain
     n = np.shape( xtrain )[0]
-    if mfunc==None:
+    if mfunc is None:
         mfunc = zero_mfunc
-    if mpars==None:
+    if mpars is None:
         mpars = {}
-    if cpars==None:
+    if cpars is None:
         cpars = {}
-    if xnew==None:
+    if xnew is None:
         xnew = xtrain
         conditioned = False
-    if np.ndim( etrain )==0:
-        if ( etrain==None )+( etrain==0 ):
+    nnew = np.shape( xnew )[0]
+    if np.ndim( etrain ) is 0:
+        if ( etrain is None )+( etrain is 0 ):
             etrain = perturb*np.ones( n )
         else:
             etrain = etrain*np.ones( n )
-    elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+    elif ( np.all( etrain ) is None )+( np.all( etrain ) is 0 ):
         etrain = perturb*np.ones( n )
-    elif ( np.ndim( etrain )==2 ):
+    elif ( np.ndim( etrain ) is 2 ):
         etrain = etrain.flatten()
-    if np.ndim( enew )==0:
-        if ( enew==None )+( enew==0 ):
-            enew = perturb*np.ones( n )
+    if np.ndim( enew ) is 0:
+        if ( enew is None )+( enew is 0 ):
+            enew = perturb*np.ones( nnew )
         else:
-            enew = enew*np.ones( n )
-    elif ( np.all( enew )==None )+( np.all( enew )==0 ):
-        enew = perturb*np.ones( n )
-    elif ( np.ndim( enew )==2 ):
+            enew = enew*np.ones( nnew )
+    elif ( np.all( enew ) is None )+( np.all( enew ) is 0 ):
+        enew = perturb*np.ones( nnew )
+    elif ( np.ndim( enew ) is 2 ):
         enew = enew.flatten()
 
     # The number of predictive points:
@@ -320,17 +321,17 @@ def predictive( gp_obj, xnew=None, enew=None, conditioned=True, perturb=PERTURB 
     kpp = cfunc( xnew, None, **cpars ).flatten()
 
     # Evaluate the predictive means and variances:
-    if conditioned==True:
+    if conditioned is True:
 
         n = np.shape( xtrain )[0]
-        if np.ndim( etrain )==0:
-            if ( etrain==None )+( etrain==0 ):
+        if np.ndim( etrain ) is 0:
+            if ( etrain is None )+( etrain is 0 ):
                 etrain = perturb*np.ones( n )
             else:
                 etrain = etrain*np.ones( n )
-        elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+        elif ( np.all( etrain ) is None )+( np.all( etrain ) is 0 ):
             etrain = perturb*np.ones( n )
-        elif ( np.ndim( etrain )==2 ):
+        elif ( np.ndim( etrain ) is 2 ):
             etrain = etrain.flatten()
 
         # Precomputations:
@@ -385,21 +386,21 @@ def logp_builtin( gp_obj, perturb=PERTURB ):
     cfunc = gp_obj.cfunc
     cpars = gp_obj.cpars
     n = np.shape( dtrain )[0]
-    if mpars==None:
+    if mpars is None:
         mpars = {}
-    if cpars==None:
+    if cpars is None:
         cpars = {}
-    if np.ndim( etrain )==0:
-        if ( etrain==None )*( etrain==0 ):
+    if np.ndim( etrain ) is 0:
+        if ( etrain is None )*( etrain is 0 ):
             etrain = perturb*np.ones( n )
         else:
             etrain = etrain*np.ones( n )
-    elif ( np.all( etrain )==None )+( np.all( etrain )==0 ):
+    elif ( np.all( etrain ) is None )+( np.all( etrain ) is 0 ):
         etrain = perturb*np.ones( n )
-    elif ( np.ndim( etrain )==2 ):
+    elif ( np.ndim( etrain ) is 2 ):
         etrain = etrain.flatten()
         
-    if mfunc==None:
+    if mfunc is None:
         mfunc = zero_mfunc
     mu = mfunc( xtrain, **mpars )
     resids = dtrain.flatten() - mu.flatten()
@@ -441,14 +442,14 @@ def logp_ORIGINAL( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
     """
     t1=time.time()
     n = np.shape( resids )[0]
-    if ( np.ndim( sigw )==0 ):
-        if ( sigw==None )+( sigw==0.0 ):
+    if ( np.ndim( sigw ) is 0 ):
+        if ( sigw is None )+( sigw is 0.0 ):
             sigw = perturb*np.ones( n )
         else:
             sigw = sigw*np.ones( n )
-    elif ( np.all( sigw )==None )+( np.all( sigw )==0 ):
+    elif ( np.all( sigw ) is None )+( np.all( sigw ) is 0 ):
         sigw = perturb*np.ones( n )
-    elif ( np.ndim( sigw )==2 ):
+    elif ( np.ndim( sigw ) is 2 ):
         sigw = sigw.flatten()
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
     r = np.matrix( resids )
@@ -493,14 +494,14 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
     """
     t1=time.time()
     n = np.shape( resids )[0]
-    if ( np.ndim( sigw )==0 ):
-        if ( sigw==None )+( sigw==0.0 ):
+    if ( np.ndim( sigw ) is 0 ):
+        if ( sigw is None )+( sigw is 0.0 ):
             sigw = perturb*np.ones( n )
         else:
             sigw = sigw*np.ones( n )
-    elif ( np.all( sigw )==None )+( np.all( sigw )==0 ):
+    elif ( np.all( sigw ) is None )+( np.all( sigw ) is 0 ):
         sigw = perturb*np.ones( n )
-    elif ( np.ndim( sigw )==2 ):
+    elif ( np.ndim( sigw ) is 2 ):
         sigw = sigw.flatten()
     Kn = np.matrix( Kn + np.diag( sigw**2. ) )
     r = np.matrix( resids )
@@ -525,14 +526,14 @@ def prep_fixedcov( gp_obj, perturb=PERTURB ):
 
     Kn = gp_obj.cfunc( gp_obj.xtrain, gp_obj.xtrain, **gp_obj.cpars )
     n = np.shape( Kn )[0]
-    if np.ndim( gp_obj.etrain )==0:
-        if ( gp_obj.etrain==None )+( gp_obj.etrain==0 ):
+    if np.ndim( gp_obj.etrain ) is 0:
+        if ( gp_obj.etrain is None )+( gp_obj.etrain is 0 ):
             sigw = perturb*np.ones( n )
         else:
             sigw = gp_obj.etrain*np.ones( n )
-    elif ( np.all( gp_obj.etrain )==None )+( np.all( gp_obj.etrain )==0 ):
+    elif ( np.all( gp_obj.etrain ) is None )+( np.all( gp_obj.etrain ) is 0 ):
         sigw = gp_obj.etrain*np.ones( n )
-    elif ( np.ndim( gp_obj.etrain )==2 ):
+    elif ( np.ndim( gp_obj.etrain ) is 2 ):
         sigw = gp_obj.etrain.flatten()
     else:
         sigw = gp_obj.etrain
@@ -571,7 +572,7 @@ def logp_fixedcov( resids=None, kwpars=None ):
 
 def zero_mfunc( x, **kwargs ):
     """
-    A simple zero mean function, used whenever mfunc==None in
+    A simple zero mean function, used whenever mfunc is None in
     any of the above routines. It takes an [NxD] array as input
     and returns an [Nx1] array of zeros.
     """
