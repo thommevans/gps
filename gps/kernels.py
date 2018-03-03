@@ -224,7 +224,7 @@ def matern32_invL_ard( x, y, **cpars ):
 
     if numexpr_installed==False:
 
-        cov = sqexp_invL_ard_numpy( x, y, **cpars )
+        cov = matern32_invL_ard_numpy( x, y, **cpars )
 
     else:
 
@@ -253,6 +253,34 @@ def matern32_invL_ard( x, y, **cpars ):
             poly_term = numexpr.evaluate( '1. + arg' )
             exp_term = numexpr.evaluate( 'exp( -arg )' )
             cov = numexpr.evaluate( 'amp2*poly_term*exp_term' )
+
+    return cov
+
+
+def matern32_invL_ard_numpy( x, y, **cpars ):
+    """
+    Matern v=3/2 kernel with ARD for N-dimension inputs.
+    'amp' - Covariance amplitude A
+    'scale' - Array containing the inverse covariance length scales.
+    """
+
+    amp2 = cpars['amp']**2.
+    iscales = np.array( cpars['iscale'] )
+
+    x = np.matrix( x )
+    if y==None:
+        n = np.shape( x )[0]
+        cov = amp2 + np.zeros( n )
+        cov = np.reshape( cov, [ n, 1 ] )
+    else:
+        y = np.matrix( y )
+        v = np.matrix( np.diag( np.sqrt( iscales ) ) )
+        x = x*v
+        y = y*v
+        D = scipy.spatial.distance.cdist( x, y, 'euclidean' )
+        poly_term = 1. + np.sqrt( 3. )*D
+        exp_term = np.exp( -arg )
+        cov = amp2*poly_term*exp_term
 
     return cov
 
