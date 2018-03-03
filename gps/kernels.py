@@ -51,7 +51,7 @@ def sqexp( x, y, **cpars ):
     scale = cpars['scale']
 
     x = np.matrix( x )/scale
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -74,7 +74,7 @@ def matern32_invL( x, y, **cpars ):
   iscale = cpars['iscale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -99,7 +99,7 @@ def sqexp_invL( x, y, **cpars ):
     iscale = cpars['iscale']
 
     x = np.matrix( x )*np.sqrt( iscale )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -120,7 +120,7 @@ def sqexp_ard( x, y, **cpars ):
     amp = cpars['amp']
     scales = np.array( cpars['scale'] )
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -196,7 +196,7 @@ def sqexp_invL_ard( x, y, **cpars ):
         iscales = np.array( cpars['iscale'] )
 
         x = np.matrix( x )
-        if y==None:
+        if y is None:
             n = np.shape( x )[0]
             cov = amp2 + np.zeros( n )
             cov = np.reshape( cov, [ n, 1 ] )
@@ -234,7 +234,7 @@ def matern32_invL_ard( x, y, **cpars ):
         iscales = np.array( cpars['iscale'] )
 
         x = np.matrix( x )
-        if y==None:
+        if y is None:
             n = np.shape( x )[0]
             cov = amp2 + np.zeros( n )
             cov = np.reshape( cov, [ n, 1 ] )
@@ -268,7 +268,7 @@ def matern32_invL_ard_numpy( x, y, **cpars ):
     iscales = np.array( cpars['iscale'] )
 
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = amp2 + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -299,7 +299,7 @@ def matern12( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -319,7 +319,7 @@ def matern32( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -342,7 +342,7 @@ def matern32_ard( x, y, **cpars ):
     scales = np.array( cpars['scale'] )
     
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
@@ -369,7 +369,7 @@ def matern52( x, y, **cpars ):
   scale = cpars['scale']
 
   x = np.matrix( x )
-  if y==None:
+  if y is None:
       n = np.shape( x )[0]
       cov = ( amp**2. ) + np.zeros( n )
       cov = np.reshape( cov, [ n, 1 ] )
@@ -393,7 +393,7 @@ def matern52_ard( x, y, **cpars ):
     scales = np.array( cpars['scale'] )
     
     x = np.matrix( x )
-    if y==None:
+    if y is None:
         n = np.shape( x )[0]
         cov = ( amp**2. ) + np.zeros( n )
         cov = np.reshape( cov, [ n, 1 ] )
