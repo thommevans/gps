@@ -151,7 +151,7 @@ def sqexp_invL_ard_numpy( x, y, **cpars ):
     """
 
     amp = cpars['amp']
-    scales = np.array( cpars['scale'] )
+    scales = np.array( cpars['iscale'] )
 
     x = np.matrix( x )
     if y==None:
