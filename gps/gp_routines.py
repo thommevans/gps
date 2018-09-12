@@ -510,6 +510,7 @@ def logp( resids=None, Kn=None, sigw=None, perturb=PERTURB ):
     logdetK = ( 2*np.log( np.diag( chofactor[0] ) ).sum() )
     logP = -0.5*r.T*np.mat( scipy.linalg.cho_solve( chofactor, r ) ) - 0.5*logdetK - 0.5*r.size*np.log( 2*np.pi )
     t2=time.time()
+
     return float( logP )
 
 
